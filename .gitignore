@@ -1,0 +1,14 @@
+logs/
+data_lake/
+synthetic_data/.ipynb_checkpoints
+jupyter_notebook/*
+!jupyter_notebook/spark_submit.ipynb
+superset_data/
+.idea/
+dags/__pycache__/
+clickhouse/*
+!clickhouse/init
+dags/.DS_Store
+.DS_Store
+s3_storage/
+temp/
