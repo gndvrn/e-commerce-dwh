@@ -1,15 +1,6 @@
 dbt_click:
   target: dev
   outputs:
-    monitoring:
-      type: clickhouse
-      schema: monitoring
-      host: clickhouse
-      port: 9000
-      user: admin
-      password: admin
-      secure: False
-
     datamart:
       type: clickhouse
       schema: datamart
