@@ -1,11 +1,14 @@
 dbt_click:
-  target: dev
+  target: prod
   outputs:
-    datamart:
+    prod:
       type: clickhouse
-      schema: datamart
+      schema: staging
       host: clickhouse
       port: 9000
-      user: admin
-      password: admin
+      user: "{{ env_var('CLICKHOUSE_USER', 'admin') }}"
+      password: "{{ env_var('CLICKHOUSE_PASSWORD', 'admin') }}"
       secure: False
+      verify: False
+      connect_timeout: 10
+      send_receive_timeout: 300

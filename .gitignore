@@ -12,3 +12,16 @@ dags/.DS_Store
 .DS_Store
 s3_storage/
 temp/
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.coverage
+htmlcov/
+# dbt
+dbt_click/target/
+dbt_click/dbt_packages/
+dbt_click/logs/
+# Test artifacts
+.pytest_cache/
