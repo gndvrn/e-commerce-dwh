@@ -1,0 +1,10 @@
+pytest>=7.4
+pytest-mock>=3.12
+pytest-cov>=4.1
+faker>=20.0
+pandas>=2.0
+pyarrow>=13.0
+psycopg2-binary>=2.9
+boto3>=1.28
+clickhouse-connect>=0.7
+sqlparse>=0.4

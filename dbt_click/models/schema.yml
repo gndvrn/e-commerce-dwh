@@ -1,0 +1,293 @@
+version: 2
+
+# ============================================================
+# Staging layer tests
+# ============================================================
+
+models:
+
+  - name: stg_web_users
+    description: "Cleaned user profiles from web OLTP source."
+    columns:
+      - name: id
+        tests:
+          - not_null
+          - unique
+      - name: email
+        tests:
+          - not_null
+      - name: country
+        tests:
+          - not_null
+
+  - name: stg_web_products
+    description: "Products with price/cost from web source."
+    columns:
+      - name: id
+        tests:
+          - not_null
+          - unique
+      - name: price
+        tests:
+          - not_null
+      - name: cost_price
+        tests:
+          - not_null
+
+  - name: stg_web_orders
+    description: "Web orders with status lifecycle."
+    columns:
+      - name: id
+        tests:
+          - not_null
+          - unique
+      - name: user_id
+        tests:
+          - not_null
+      - name: status
+        tests:
+          - accepted_values:
+              values: ['pending','paid','processing','shipped','delivered','cancelled','refunded']
+
+  - name: stg_web_carts
+    description: "Shopping carts with conversion status."
+    columns:
+      - name: id
+        tests:
+          - not_null
+      - name: status
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['active', 'abandoned', 'converted']
+
+  - name: stg_oms_orders
+    description: "OMS order lifecycle."
+    columns:
+      - name: id
+        tests:
+          - not_null
+          - unique
+      - name: status
+        tests:
+          - accepted_values:
+              values: ['received','confirmed','dispatched','delivered','cancelled']
+
+  - name: stg_wms_inventory
+    description: "Current warehouse inventory levels."
+    columns:
+      - name: id
+        tests:
+          - not_null
+      - name: wms_product_id
+        tests:
+          - not_null
+
+  - name: stg_marketing_visits
+    description: "Marketing platform visits / sessions."
+    columns:
+      - name: id
+        tests:
+          - not_null
+
+
+# ============================================================
+# Core layer tests
+# ============================================================
+
+  - name: dim_date
+    description: "Calendar date dimension – 3-year spine."
+    columns:
+      - name: date_sk
+        tests:
+          - not_null
+          - unique
+      - name: date_day
+        tests:
+          - not_null
+      - name: year
+        tests:
+          - not_null
+      - name: month
+        tests:
+          - not_null
+          - accepted_values:
+              values: [1,2,3,4,5,6,7,8,9,10,11,12]
+      - name: day_of_week
+        tests:
+          - accepted_values:
+              values: [1,2,3,4,5,6,7]
+      - name: is_weekend
+        tests:
+          - accepted_values:
+              values: [0, 1]
+
+  - name: dim_customer
+    description: "Denormalized customer profile (SCD1)."
+    columns:
+      - name: customer_sk
+        tests:
+          - not_null
+          - unique
+      - name: email
+        tests:
+          - not_null
+
+  - name: dim_product
+    description: "Denormalized product with category hierarchy."
+    columns:
+      - name: product_sk
+        tests:
+          - not_null
+          - unique
+      - name: product_name
+        tests:
+          - not_null
+      - name: price
+        tests:
+          - not_null
+      - name: cost_price
+        tests:
+          - not_null
+
+  - name: dim_channel
+    description: "Marketing traffic channels."
+    columns:
+      - name: channel_sk
+        tests:
+          - not_null
+          - unique
+      - name: channel_type
+        tests:
+          - accepted_values:
+              values: ['organic','google_ads','yandex_direct','email','referral','social']
+
+  - name: dim_campaign
+    description: "Paid advertising campaigns."
+    columns:
+      - name: campaign_sk
+        tests:
+          - not_null
+          - unique
+
+  - name: fact_order_items
+    description: "Sales fact at order-line-item grain."
+    columns:
+      - name: order_item_sk
+        tests:
+          - not_null
+          - unique
+      - name: order_id
+        tests:
+          - not_null
+      - name: date_sk
+        tests:
+          - not_null
+      - name: customer_sk
+        tests:
+          - not_null
+      - name: product_sk
+        tests:
+          - not_null
+      - name: revenue
+        tests:
+          - not_null
+      - name: cogs
+        tests:
+          - not_null
+
+  - name: fact_sessions
+    description: "Web session fact (traffic, conversion, bounce)."
+    columns:
+      - name: session_sk
+        tests:
+          - not_null
+          - unique
+      - name: date_sk
+        tests:
+          - not_null
+      - name: converted
+        tests:
+          - accepted_values:
+              values: [0, 1]
+      - name: is_bounce
+        tests:
+          - accepted_values:
+              values: [0, 1]
+
+  - name: fact_fulfillment
+    description: "Shipment fact with OTIF and picking accuracy."
+    columns:
+      - name: shipment_sk
+        tests:
+          - not_null
+          - unique
+      - name: is_otif
+        tests:
+          - accepted_values:
+              values: [0, 1]
+
+  - name: fact_inventory_snapshot
+    description: "Daily inventory snapshot per WMS product."
+    columns:
+      - name: date_sk
+        tests:
+          - not_null
+      - name: wms_product_id
+        tests:
+          - not_null
+      - name: is_out_of_stock
+        tests:
+          - accepted_values:
+              values: [0, 1]
+
+  - name: fact_ad_stats
+    description: "Daily advertising statistics per campaign."
+    columns:
+      - name: ad_stat_sk
+        tests:
+          - not_null
+      - name: campaign_sk
+        tests:
+          - not_null
+      - name: stat_date
+        tests:
+          - not_null
+
+
+# ============================================================
+# Data mart tests
+# ============================================================
+
+  - name: mart_sales
+    description: "Sales KPI mart: revenue, orders, conversion, AOV."
+    columns:
+      - name: report_date
+        tests:
+          - not_null
+      - name: total_revenue
+        tests:
+          - not_null
+      - name: gross_margin_pct
+        tests:
+          - not_null
+
+  - name: mart_marketing
+    description: "Marketing KPI mart: traffic, CPC, ROMI, CAC."
+    columns:
+      - name: report_date
+        tests:
+          - not_null
+      - name: channel_name
+        tests:
+          - not_null
+
+  - name: mart_inventory
+    description: "Inventory & fulfillment KPI mart: OTIF, Days' Supply."
+    columns:
+      - name: report_date
+        tests:
+          - not_null
+      - name: otif_rate
+        tests:
+          - not_null
